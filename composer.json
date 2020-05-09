@@ -1,0 +1,43 @@
+{
+    "name": "todaydesign/craft-static-dusk",
+    "description": "Static site builder for Craft and AWS Code Pipelines",
+    "type": "craft-plugin",
+    "version": "1.0.1",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "craft static dusk"
+    ],
+    "support": {
+        "docs": "https://github.com/TodayDesign/craft-static-dusk/blob/master/README.md",
+        "issues": "https://github.com/TodayDesign/craft-static-dusk/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jason D'Souza",
+            "homepage": "https://today.design"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "todaydesign\\craftstaticdusk\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Static Dusk",
+        "handle": "craft-static-dusk",
+        "hasCpSettings": true,
+        "hasCpSection": true,
+        "changelogUrl": "https://raw.githubusercontent.com/TodayDesign/craft-static-dusk/master/CHANGELOG.md",
+        "components": {
+            "craftStaticDuskService": "todaydesign\\craftstaticdusk\\services\\CraftStaticDuskService"
+        },
+        "class": "todaydesign\\craftstaticdusk\\CraftStaticDusk"
+    }
+}

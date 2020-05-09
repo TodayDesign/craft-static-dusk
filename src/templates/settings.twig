@@ -1,0 +1,43 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Craft Static Dusk plugin for Craft CMS 3.x
+ *
+ * Craft Static Dusk Settings.twig
+ *
+ * @author    Jason D'Souza
+ * @copyright Copyright (c) 2020 Jason D'Souza
+ * @link      https://today.design
+ * @package   CraftStaticDusk
+ * @since     1.0.1
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("todaydesign\\craftstaticdusk\\assetbundles\\craftstaticdusk\\CraftStaticDuskAsset") %}
+
+{{ forms.textField({
+    label: 'Some Field',
+    instructions: 'Enter some setting here.',
+    id: 'someAttribute',
+    name: 'someAttribute',
+    value: settings['someAttribute']})
+}}
+
+
+{{ forms.textField({
+    label: 'WebHook URL',
+    instructions: 'Add environment variable',
+    id: 'webHookUrl',
+    name: 'webHookUrl',
+    value: settings['webHookUrl']})
+}}
+
+{{ forms.textField({
+    label: 'WebHook Secret',
+    instructions: 'Add environment variable',
+    id: 'webHookSecret',
+    name: 'webHookSecret',
+    value: settings['webHookSecret']})
+}}

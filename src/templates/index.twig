@@ -1,0 +1,54 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Craft Static Dusk plugin for Craft CMS 3.x
+ *
+ * Craft Static Dusk index.twig
+ *
+ * @author    Jason D'Souza
+ * @copyright Copyright (c) 2020 Jason D'Souza
+ * @link      https://today.design
+ * @package   CraftStaticDusk
+ * @since     1.0.1
+ */
+#}
+
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("todaydesign\\craftstaticdusk\\assetbundles\\craftstaticdusk\\CraftStaticDuskAsset") %}
+{% do view.registerAssetBundle("todaydesign\\craftstaticdusk\\assetbundles\\indexcpsection\\IndexCPSectionAsset") %}
+
+{# Link for the ? icon at the bottom of the page #}
+{% set docsUrl = "https://github.com/TodayDesign/craft-static-dusk/blob/master/README.md" %}
+
+{# The title of this CP section #}
+{% set title = "Static Dusk - Site builder" %}
+
+{# The URL to this plugin's base CP section #}
+{% set pluginCpUrl = url('craft-static-dusk') %}
+
+{# Get a URL to an image in our AssetBundle #}
+{% set iconUrl = view.getAssetManager().getPublishedUrl('@todaydesign/craftstaticdusk/assetbundles/indexcpsection/dist', true) ~ '/img/Index-icon.svg' %}
+
+{# Content that should appear in the page header#}
+{% set extraPageHeaderHtml %}
+    <div class="buttons">
+        <a href="{{ pluginCpUrl }}" class="btn submit add icon">{{ "Click Me!"|t('craft-static-dusk') }}</a>
+    </div>
+{% endset %}
+
+{# The content of the CP Section#}
+{% set content %}
+    <h2>{{ "Click the button below to generate a new static build."|t('craft-static-dusk') }}</h2>
+    
+    <p class="textline">This action will build a new static site for production with all the currently published content and configuration.</p>
+    <p class="textline">The button below will not provide any feedback. Once clicked the site build will take approximately 15 minutes.</p>
+    <p class="textline">Test the production site in an incognito browser window to ensure the content is published as expected.</p>
+    <form method="post" action="">
+    {{csrfInput()}}
+    <input type="hidden" name="action" value="craft-static-dusk/generate/build" />
+
+    <input type="submit" class="submit btn" value="Generate Site Build" />
+    </form>
+{% endset %}
