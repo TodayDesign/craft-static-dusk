@@ -17,27 +17,49 @@
 
 {% do view.registerAssetBundle("todaydesign\\craftstaticdusk\\assetbundles\\craftstaticdusk\\CraftStaticDuskAsset") %}
 
-{{ forms.textField({
-    label: 'Some Field',
-    instructions: 'Enter some setting here.',
-    id: 'someAttribute',
-    name: 'someAttribute',
-    value: settings['someAttribute']})
-}}
 
-
-{{ forms.textField({
+{{ forms.autosuggestField({
     label: 'WebHook URL',
     instructions: 'Add environment variable',
     id: 'webHookUrl',
     name: 'webHookUrl',
+    suggestEnvVars: true,
     value: settings['webHookUrl']})
 }}
 
-{{ forms.textField({
+{{ forms.autosuggestField({
     label: 'WebHook Secret',
     instructions: 'Add environment variable',
     id: 'webHookSecret',
     name: 'webHookSecret',
+    suggestEnvVars: true,
     value: settings['webHookSecret']})
+}}
+
+{{ forms.autosuggestField({
+    label: 'WebHook Type',
+    instructions: 'Add environment variable',
+    id: 'webHookType',
+    name: 'webHookType',
+    suggestEnvVars: true,
+    value: settings['webHookType']})
+}}
+
+{{ forms.autosuggestField({
+    label: 'Git Repo',
+    instructions: 'Add environment variable',
+    id: 'gitRepo',
+    name: 'gitRepo',
+    suggestEnvVars: true,
+    value: settings['gitRepo']})
+}}
+
+
+{{ forms.autosuggestField({
+    label: 'Git Ref',
+    instructions: 'Add environment variable',
+    id: 'gitRef',
+    name: 'gitRef',
+    suggestEnvVars: true,
+    value: settings['gitRef']})
 }}

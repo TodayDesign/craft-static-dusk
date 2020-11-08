@@ -57,6 +57,19 @@ class GenerateController extends Controller
 
         $curl = curl_init();
 
+        $payload = [
+            'secret' => Craft::parseEnv($settings->webHookSecret)
+        ];
+
+        print_r($settings);
+
+        if ( Craft::parseEnv($settings->webHookType) === 'GH') {
+            $payload = array_merge($payload, [
+                'repo' =>  Craft::parseEnv($settings->gitRepo),
+                'ref' =>  Craft::parseEnv($settings->gitRef),
+            ]);
+        }
+
         curl_setopt_array($curl, array(
         CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
         CURLOPT_RETURNTRANSFER => true,
@@ -67,7 +80,7 @@ class GenerateController extends Controller
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => "POST",
         CURLOPT_VERBOSE => true,
-        CURLOPT_POSTFIELDS =>"{\"secret\": \"".Craft::parseEnv($settings->webHookSecret)."\"}",
+        CURLOPT_POSTFIELDS => json_encode((object) $payload),
         CURLOPT_HTTPHEADER => array(
             "Content-Type: application/json"
         ),

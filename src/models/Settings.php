@@ -42,6 +42,9 @@ class Settings extends Model
     public $someAttribute = 'Some Default Setting';
     public $webHookUrl = '';
     public $webHookSecret = '';
+    public $webHookType = '';
+    public $gitRepo = '';
+    public $gitRef = '';
 
 
     // Public Methods
@@ -65,6 +68,9 @@ class Settings extends Model
             ['webHookSecret', 'string'],
             ['webHookUrl', 'default', 'value' => '$STATIC_BUILD_WEBHOOK_URL'],
             ['webHookSecret', 'default', 'value' => '$STATIC_BUILD_WEBHOOK_SECRET'],
+            ['webHookType', 'default', 'value' => '$STATIC_BUILD_WEBHOOK_TYPE'],
+            ['gitRepo', 'default', 'value' => '$STATIC_BUILD_GIT_REPO'],
+            ['gitRef', 'default', 'value' => '$STATIC_BUILD_GIT_REF'],
             ['someAttribute', 'default', 'value' => 'Some Default'],
         ];
     }
