@@ -61,12 +61,11 @@ class GenerateController extends Controller
             'secret' => Craft::parseEnv($settings->webHookSecret)
         ];
 
-        print_r($settings);
-
         if ( Craft::parseEnv($settings->webHookType) === 'GH') {
             $payload = array_merge($payload, [
                 'repo' =>  Craft::parseEnv($settings->gitRepo),
                 'ref' =>  Craft::parseEnv($settings->gitRef),
+                'envName' => Craft::parseEnv($settings->environmentName),
             ]);
         }
 
@@ -89,11 +88,8 @@ class GenerateController extends Controller
         $response = curl_exec($curl);
 
         curl_close($curl);
-        // echo $response;
 
         Craft::$app->getSession()->setNotice('Static build initiated.');
-
-        // return $result;
     }
 
 }

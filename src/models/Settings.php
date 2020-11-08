@@ -45,6 +45,7 @@ class Settings extends Model
     public $webHookType = '';
     public $gitRepo = '';
     public $gitRef = '';
+    public $environmentName = '';
 
 
     // Public Methods
@@ -71,6 +72,7 @@ class Settings extends Model
             ['webHookType', 'default', 'value' => '$STATIC_BUILD_WEBHOOK_TYPE'],
             ['gitRepo', 'default', 'value' => '$STATIC_BUILD_GIT_REPO'],
             ['gitRef', 'default', 'value' => '$STATIC_BUILD_GIT_REF'],
+            ['environmentName', 'default', 'value' => '$ENVIRONMENT_NAME'],
             ['someAttribute', 'default', 'value' => 'Some Default'],
         ];
     }

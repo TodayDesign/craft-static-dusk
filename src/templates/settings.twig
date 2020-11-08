@@ -63,3 +63,13 @@
     suggestEnvVars: true,
     value: settings['gitRef']})
 }}
+
+
+{{ forms.autosuggestField({
+    label: 'Environment Name',
+    instructions: 'Add environment variable',
+    id: 'environmentName',
+    name: 'environmentName',
+    suggestEnvVars: true,
+    value: settings['environmentName']})
+}}
