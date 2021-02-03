@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2020 Jason D'Souza
  */
 
-namespace todaydesign\craftstaticdusk\assetbundles\CraftStaticDusk;
+namespace todaydesign\craftstaticdusk\assetbundles\craftstaticdusk;
 
 use Craft;
 use craft\web\AssetBundle;
