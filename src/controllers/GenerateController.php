@@ -70,19 +70,20 @@ class GenerateController extends Controller
         }
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "POST",
-        CURLOPT_VERBOSE => true,
-        CURLOPT_POSTFIELDS => json_encode((object) $payload),
-        CURLOPT_HTTPHEADER => array(
-            "Content-Type: application/json"
-        ),
+//            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
+            CURLOPT_URL => "https://gh-dev.tech.1.today.design/static-build",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_VERBOSE => true,
+            CURLOPT_POSTFIELDS => json_encode((object) $payload),
+            CURLOPT_HTTPHEADER => array(
+                "Content-Type: application/json"
+            ),
         ));
 
         $response = curl_exec($curl);
