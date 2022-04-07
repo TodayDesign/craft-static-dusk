@@ -14,7 +14,6 @@ use todaydesign\craftstaticdusk\CraftStaticDusk;
 
 use Craft;
 use craft\web\Controller;
-
 /**
  * Generate Controller
  *
@@ -38,7 +37,7 @@ use craft\web\Controller;
 class GenerateController extends Controller
 {
 
-    
+
 
     // Public Methods
     // =========================================================================
@@ -51,9 +50,9 @@ class GenerateController extends Controller
      */
     public function actionBuild()
     {
-        // $result = 'Welcome to the DefaultController actionIndex() method';
 
         $settings = CraftStaticDusk::$plugin->getSettings();
+        $site = Craft::$app->request->post("siteHandle");
 
         $curl = curl_init();
 
@@ -66,23 +65,24 @@ class GenerateController extends Controller
                 'repo' =>  Craft::parseEnv($settings->gitRepo),
                 'ref' =>  Craft::parseEnv($settings->gitRef),
                 'envName' => Craft::parseEnv($settings->environmentName),
+                'site' => $site
             ]);
         }
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "POST",
-        CURLOPT_VERBOSE => true,
-        CURLOPT_POSTFIELDS => json_encode((object) $payload),
-        CURLOPT_HTTPHEADER => array(
-            "Content-Type: application/json"
-        ),
+            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_VERBOSE => true,
+            CURLOPT_POSTFIELDS => json_encode((object) $payload),
+            CURLOPT_HTTPHEADER => array(
+                "Content-Type: application/json"
+            ),
         ));
 
         $response = curl_exec($curl);
