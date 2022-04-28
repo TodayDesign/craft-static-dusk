@@ -2,7 +2,7 @@
     "name": "todaydesign/craft-static-dusk",
     "description": "Static site builder for Craft and AWS Code Pipelines",
     "type": "craft-plugin",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "keywords": [
         "craft",
         "cms",
@@ -30,7 +30,7 @@
         }
     },
     "extra": {
-        "name": "Static Dusk",
+        "name": "Publish Website",
         "handle": "craft-static-dusk",
         "hasCpSettings": true,
         "hasCpSection": true,
