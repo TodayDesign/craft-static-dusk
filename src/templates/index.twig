@@ -31,39 +31,45 @@
 {# Get a URL to an image in our AssetBundle #}
 {% set iconUrl = view.getAssetManager().getPublishedUrl('@todaydesign/craftstaticdusk/assetbundles/indexcpsection/dist', true) ~ '/img/Index-icon.svg' %}
 
-{# Get all scheduled builds for this site #}
-{% set scheduledBuilds = craft.craftStaticDusk.getScheduledStaticBuilds() %}
 
-{# Content that should appear in the page header#}
+
+{% set siteIds = siteIds ?? craft.app.sites.getEditableSiteIds() %}
+
+{% if selectedSiteId is not defined %}
+    {% if craft.request.getQuery('site') %}
+        {% set selectedSiteId = craft.request.getQuery('site') %}
+    {% else %}
+        {% set selectedSiteId = siteIds|first %}
+    {% endif %}
+{% endif %}
+
+{% set site = craft.app.sites.getSiteById(selectedSiteId) %}
+
+{# Get all scheduled builds for this site #}
+{% set scheduledBuilds = craft.craftStaticDusk.getScheduledStaticBuilds(site.handle) %}
+
+{# Content that should appear in the page header #}
 {% set extraPageHeaderHtml %}
     <div class="buttons">
         <a href="{{ pluginCpUrl }}" class="btn submit add icon">{{ "Click Me!"|t('craft-static-dusk') }}</a>
     </div>
 {% endset %}
 
-{# The content of the CP Section#}
+{# The content of the CP Section #}
 {% set content %}
     <h2>{{ "Click the button below to generate a new static build."|t('craft-static-dusk') }}</h2>
 
-    <p class="textline">This action will build a new static site for production with all the currently published content and configuration.</p>
-    <p class="textline">The button below will not provide any feedback. Once clicked the site build will take approximately 15 minutes.</p>
-    <p class="textline">Test the production site in an incognito browser window to ensure the content is published as expected.</p>
+    <p class="textline">This action will build a new static site for production with all the currently published content
+        and configuration.</p>
+    <p class="textline">The button below will not provide any feedback. Once clicked the site build will take
+        approximately 15 minutes.</p>
+    <p class="textline">Test the production site in an incognito browser window to ensure the content is published as
+        expected.</p>
     <form method="post" action="">
-        {{csrfInput()}}
-        <input type="hidden" name="action" value="craft-static-dusk/generate/build" />
+        {{ csrfInput() }}
+        <input type="hidden" name="action" value="craft-static-dusk/generate/build"/>
 
-        {% set siteIds = siteIds ?? craft.app.sites.getEditableSiteIds() %}
         {% if siteIds|length %}
-
-            {% if selectedSiteId is not defined %}
-                {% if craft.request.getQuery('site') %}
-                    {% set selectedSiteId = craft.request.getQuery('site') %}
-                {% else %}
-                    {% set selectedSiteId = siteIds|first %}
-                {% endif %}
-            {% endif %}
-
-            {% set site = craft.app.sites.getSiteById(selectedSiteId) %}
             {{ hiddenInput('siteHandle', site.handle) }}
 
             {% set groups = craft.app.sites.getAllGroups() %}
@@ -91,33 +97,58 @@
             </div>
         {% endif %}
 
-        <input type="submit" class="submit btn" value="Generate Site Build" />
-
-        <br><br>
-
-        <h2>Scheduled static builds</h2>
-        <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">    <thead>
-            <tr>
-                <th scope="col" class="code singleline-cell textual fullwidth" >Launch time</th>
-                <th scope="col" class="code singleline-cell textual" colspan="1" >Remove</th>
-            </tr>
-            </thead>
-            <tbody>
-
-            {% for build in scheduledBuilds %}
-                <tr data-id="0">
-                    <td style="text-align: left">
-                        <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
-                    </td>
-                    <td class="action"><a class="delete icon" title="Delete" aria-label="Delete"></a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        <br><br>
+        <input type="submit" class="submit btn" value="Launch Site Build"/>
 
     </form>
+
+    <br><br>
+
+    <h2>Schedule a static build</h2>
+    <form method="post" action="">
+        {{ csrfInput() }}
+        {{ hiddenInput('siteHandle', site.handle) }}
+        <input type="hidden" name="action" value="craft-static-dusk/generate/schedule"/>
+
+        <div class="flex">
+            <div class="datetimewrapper">
+                <div class="datewrapper">
+                    <input type="text" class="text hasDatepicker" name="scheduleDate" value="08/08/2022" size="10"
+                           autocomplete="off" placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
+                    <div data-icon="date"></div>
+                </div>
+                <div class="timewrapper"><input type="text" id="postDate-time" class="text ui-timepicker-input"
+                                                name="scheduleTime" value="16:50" size="10" autocomplete="off"
+                                                placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
+                    <div data-icon="time"></div>
+                    <input type="hidden" name="scheduleTime" value="16:50"></div>
+            </div>
+            <input type="submit" class="secondary btn" value="Schedule Build"/>
+        </div>
+    </form>
+
+    <h2>Upcoming static builds</h2>
+    <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
+        <thead>
+        <tr>
+            <th scope="col" class="code singleline-cell textual fullwidth">Launch time</th>
+            <th scope="col" class="code singleline-cell textual" colspan="1">Remove</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for build in scheduledBuilds %}
+            <tr data-id="0">
+                <td style="text-align: left">
+                    <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
+                </td>
+                <td class="action"><a class="delete icon" title="Delete" aria-label="Delete"></a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <br><br>
+
 
 {% endset %}
 
