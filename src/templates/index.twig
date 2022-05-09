@@ -31,6 +31,9 @@
 {# Get a URL to an image in our AssetBundle #}
 {% set iconUrl = view.getAssetManager().getPublishedUrl('@todaydesign/craftstaticdusk/assetbundles/indexcpsection/dist', true) ~ '/img/Index-icon.svg' %}
 
+{# Get all scheduled builds for this site #}
+{% set scheduledBuilds = craft.craftStaticDusk.getScheduledStaticBuilds() %}
+
 {# Content that should appear in the page header#}
 {% set extraPageHeaderHtml %}
     <div class="buttons">
@@ -41,14 +44,80 @@
 {# The content of the CP Section#}
 {% set content %}
     <h2>{{ "Click the button below to generate a new static build."|t('craft-static-dusk') }}</h2>
-    
+
     <p class="textline">This action will build a new static site for production with all the currently published content and configuration.</p>
     <p class="textline">The button below will not provide any feedback. Once clicked the site build will take approximately 15 minutes.</p>
     <p class="textline">Test the production site in an incognito browser window to ensure the content is published as expected.</p>
     <form method="post" action="">
-    {{csrfInput()}}
-    <input type="hidden" name="action" value="craft-static-dusk/generate/build" />
+        {{csrfInput()}}
+        <input type="hidden" name="action" value="craft-static-dusk/generate/build" />
 
-    <input type="submit" class="submit btn" value="Generate Site Build" />
+        {% set siteIds = siteIds ?? craft.app.sites.getEditableSiteIds() %}
+        {% if siteIds|length %}
+
+            {% if selectedSiteId is not defined %}
+                {% if craft.request.getQuery('site') %}
+                    {% set selectedSiteId = craft.request.getQuery('site') %}
+                {% else %}
+                    {% set selectedSiteId = siteIds|first %}
+                {% endif %}
+            {% endif %}
+
+            {% set site = craft.app.sites.getSiteById(selectedSiteId) %}
+            {{ hiddenInput('siteHandle', site.handle) }}
+
+            {% set groups = craft.app.sites.getAllGroups() %}
+            <button type="button" id="context-btn" class="btn menubtn sitemenubtn" data-icon="world">
+                {{ selectedSiteId ? craft.app.sites.getSiteById(selectedSiteId).name|t('site') }}
+            </button>
+            <div class="menu">
+                {% for group in groups %}
+                    {% set groupSiteIds = group.getSiteIds()|intersect(siteIds) %}
+                    {% if groupSiteIds %}
+                        {% if groups|length > 1 %}<h6>{{ group.name|t('site') }}</h6>{% endif %}
+                        <ul class="padded">
+                            {% for siteId in groupSiteIds %}
+                                {% set site = craft.app.sites.getSiteById(siteId) %}
+                                <li>
+                                    <a{% if selectedSiteId and siteId == selectedSiteId %} class="sel"{% endif %}
+                                            data-site-id="{{ siteId }}" href="?site={{ site.id }}">
+                                        {{ site.name|t('site') }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <input type="submit" class="submit btn" value="Generate Site Build" />
+
+        <br><br>
+
+        <h2>Scheduled static builds</h2>
+        <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">    <thead>
+            <tr>
+                <th scope="col" class="code singleline-cell textual fullwidth" >Launch time</th>
+                <th scope="col" class="code singleline-cell textual" colspan="1" >Remove</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for build in scheduledBuilds %}
+                <tr data-id="0">
+                    <td style="text-align: left">
+                        <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
+                    </td>
+                    <td class="action"><a class="delete icon" title="Delete" aria-label="Delete"></a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <br><br>
+
     </form>
+
 {% endset %}
+
