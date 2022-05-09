@@ -11,6 +11,7 @@
 namespace todaydesign\craftstaticdusk\controllers;
 
 use todaydesign\craftstaticdusk\CraftStaticDusk;
+use craft\helpers\FileHelper;
 
 use Craft;
 use craft\web\Controller;
@@ -38,7 +39,6 @@ use craft\web\Controller;
 class GenerateController extends Controller
 {
 
-    
 
     // Public Methods
     // =========================================================================
@@ -51,9 +51,9 @@ class GenerateController extends Controller
      */
     public function actionBuild()
     {
-        // $result = 'Welcome to the DefaultController actionIndex() method';
 
         $settings = CraftStaticDusk::$plugin->getSettings();
+        $site = Craft::$app->request->post("siteHandle");
 
         $curl = curl_init();
 
@@ -61,28 +61,30 @@ class GenerateController extends Controller
             'secret' => Craft::parseEnv($settings->webHookSecret)
         ];
 
-        if ( Craft::parseEnv($settings->webHookType) === 'GH') {
+        if (Craft::parseEnv($settings->webHookType) === 'GH') {
             $payload = array_merge($payload, [
-                'repo' =>  Craft::parseEnv($settings->gitRepo),
-                'ref' =>  Craft::parseEnv($settings->gitRef),
+                'repo' => Craft::parseEnv($settings->gitRepo),
+                'ref' => Craft::parseEnv($settings->gitRef),
                 'envName' => Craft::parseEnv($settings->environmentName),
+                'site' => $site
             ]);
         }
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "POST",
-        CURLOPT_VERBOSE => true,
-        CURLOPT_POSTFIELDS => json_encode((object) $payload),
-        CURLOPT_HTTPHEADER => array(
-            "Content-Type: application/json"
-        ),
+//            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
+            CURLOPT_URL => "https://gh-dev.tech.1.today.design/static-build",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_VERBOSE => true,
+            CURLOPT_POSTFIELDS => json_encode((object)$payload),
+            CURLOPT_HTTPHEADER => array(
+                "Content-Type: application/json"
+            ),
         ));
 
         $response = curl_exec($curl);
@@ -91,5 +93,57 @@ class GenerateController extends Controller
 
         Craft::$app->getSession()->setNotice('Static build initiated.');
     }
+
+    /**
+     * Handle a request going to our plugin's build action URL,
+     * e.g.: actions/craft-static-dusk/generate/schedule
+     *
+     * @return mixed
+     */
+    public function actionSchedule()
+    {
+
+        $settings = CraftStaticDusk::$plugin->getSettings();
+        $site = Craft::$app->request->post("siteHandle");
+
+        $scheduleDate = Craft::$app->request->post("scheduleDate");
+        $scheduleTime = Craft::$app->request->post("scheduleTime");
+        $launchTime = strtotime($scheduleDate . " " . $scheduleTime);
+
+
+        $curl = curl_init();
+
+        $payload = [
+            'secret' => Craft::parseEnv($settings->webHookSecret),
+            'repo' => Craft::parseEnv($settings->gitRepo),
+            'ref' => Craft::parseEnv($settings->gitRef),
+            'envName' => Craft::parseEnv($settings->environmentName),
+            'site' => strval($site),
+            'launchTime' => $launchTime
+        ];
+
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_VERBOSE => true,
+            CURLOPT_POSTFIELDS => json_encode((object)$payload),
+            CURLOPT_HTTPHEADER => array(
+                "Content-Type: application/json"
+            ),
+        ));
+
+        curl_exec($curl);
+        curl_close($curl);
+
+        Craft::$app->getSession()->setNotice('Static build scheduled');
+    }
+
 
 }
