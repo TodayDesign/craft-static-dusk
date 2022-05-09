@@ -31,9 +31,8 @@
 {# Get a URL to an image in our AssetBundle #}
 {% set iconUrl = view.getAssetManager().getPublishedUrl('@todaydesign/craftstaticdusk/assetbundles/indexcpsection/dist', true) ~ '/img/Index-icon.svg' %}
 
-
-{# Get all sites #}
-{% set sites = craft.app.sites.allSites %}
+{# Get all scheduled builds for this site #}
+{% set scheduledBuilds = craft.craftStaticDusk.getScheduledStaticBuilds() %}
 
 {# Content that should appear in the page header#}
 {% set extraPageHeaderHtml %}
@@ -93,6 +92,31 @@
         {% endif %}
 
         <input type="submit" class="submit btn" value="Generate Site Build" />
+
+        <br><br>
+
+        <h2>Scheduled static builds</h2>
+        <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">    <thead>
+            <tr>
+                <th scope="col" class="code singleline-cell textual fullwidth" >Launch time</th>
+                <th scope="col" class="code singleline-cell textual" colspan="1" >Remove</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for build in scheduledBuilds %}
+                <tr data-id="0">
+                    <td style="text-align: left">
+                        <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
+                    </td>
+                    <td class="action"><a class="delete icon" title="Delete" aria-label="Delete"></a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <br><br>
+
     </form>
 
 {% endset %}

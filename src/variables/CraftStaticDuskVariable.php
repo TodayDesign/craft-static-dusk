@@ -10,6 +10,7 @@
 
 namespace todaydesign\craftstaticdusk\variables;
 
+use craft\helpers\FileHelper;
 use todaydesign\craftstaticdusk\CraftStaticDusk;
 
 use Craft;
@@ -32,25 +33,55 @@ class CraftStaticDuskVariable
     // =========================================================================
 
     /**
-     * Whatever you want to output to a Twig template can go into a Variable method.
-     * You can have as many variable functions as you want.  From any Twig template,
-     * call it like this:
+     * Get scheduled static builds for this environment
      *
-     *     {{ craft.craftStaticDusk.exampleVariable }}
-     *
-     * Or, if your variable requires parameters from Twig:
-     *
-     *     {{ craft.craftStaticDusk.exampleVariable(twigValue) }}
-     *
-     * @param null $optional
-     * @return string
+     * @return mixed
      */
-    public function exampleVariable($optional = null)
+    public function getScheduledStaticBuilds()
     {
-        $result = "And away we go to the Twig template...";
-        if ($optional) {
-            $result = "I'm feeling optional today...";
+        $settings = CraftStaticDusk::$plugin->getSettings();
+        $site = Craft::$app->request->get("site");
+
+        $payload = [
+            'secret' => Craft::parseEnv($settings->webHookSecret),
+            'repo' => Craft::parseEnv($settings->gitRepo),
+            'ref' => Craft::parseEnv($settings->gitRef),
+            'envName' => Craft::parseEnv($settings->environmentName),
+            'site' => $site
+        ];
+
+        $response = null;
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_POSTFIELDS => json_encode((object)$payload),
+            CURLOPT_VERBOSE => TRUE,
+        ));
+
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+
+        $response = curl_exec($curl);
+
+        if ($response === false) {
+            // Uncomment the following lines if this request is failing
+
+            // $file = Craft::getAlias('@storage/logs/pluginhandle.log');
+            // $log = date('Y-m-d H:i:s') . ' ' . json_encode(curl_error($curl), SON_PRETTY_PRINT) . "\n";
+            // FileHelper::writeToFile($file, $log, ['append' => true]);
+            return [];
         }
-        return $result;
+
+        $response = json_decode($response);
+
+        curl_close($curl);
+
+        if (array_key_exists("responseObject", $response)) {
+            return $response->responseObject;
+        }
+
+        return [];
     }
 }
