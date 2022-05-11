@@ -71,8 +71,8 @@ class GenerateController extends Controller
         }
 
         curl_setopt_array($curl, array(
-//            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
-            CURLOPT_URL => "https://gh-dev.tech.1.today.design/static-build",
+            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
+//             CURLOPT_URL => "http://host.docker.internal:3000/static-build",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -124,7 +124,8 @@ class GenerateController extends Controller
 
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl),
+           CURLOPT_URL => Craft::parseEnv($settings->webHookUrl) . "/schedule",
+//             CURLOPT_URL => "http://host.docker.internal:3000/static-build/schedule",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -139,7 +140,10 @@ class GenerateController extends Controller
             ),
         ));
 
-        curl_exec($curl);
+        $response = curl_exec($curl);
+
+        $response = json_decode($response);
+
         curl_close($curl);
 
         Craft::$app->getSession()->setNotice('Static build scheduled');
