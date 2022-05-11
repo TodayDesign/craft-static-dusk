@@ -150,4 +150,57 @@ class GenerateController extends Controller
     }
 
 
+    /**
+     *
+     * Remove scheduled build
+     *
+     * @return mixed
+     */
+    public function actionDelete()
+    {
+
+        $settings = CraftStaticDusk::$plugin->getSettings();
+
+        $id = Craft::$app->request->post("id");
+        $launchTime = Craft::$app->request->post("launchTime");
+
+
+        $curl = curl_init();
+
+        $payload = [
+            'secret' => Craft::parseEnv($settings->webHookSecret),
+            'id' => $id,
+            'launchTime' => intval($launchTime)
+        ];
+
+
+        curl_setopt_array($curl, array(
+           CURLOPT_URL => Craft::parseEnv($settings->webHookUrl) . "/scheduled",
+            CURLOPT_URL => "http://host.docker.internal:3000/static-build/scheduled",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "DELETE",
+            CURLOPT_VERBOSE => true,
+            CURLOPT_POSTFIELDS => json_encode((object)$payload),
+            CURLOPT_HTTPHEADER => array(
+                "Content-Type: application/json"
+            ),
+        ));
+
+        $file = Craft::getAlias('@storage/logs/pluginhandle.log');
+        $log = date('Y-m-d H:i:s').' '. json_encode($payload, JSON_PRETTY_PRINT) ."\n";
+        FileHelper::writeToFile($file, $log, ['append' => true]);
+
+        $response = curl_exec($curl);
+        $response = json_decode($response);
+        curl_close($curl);
+
+        Craft::$app->getSession()->setNotice('Static build removed');
+    }
+
+
 }

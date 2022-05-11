@@ -125,7 +125,7 @@
 
     <form method="post" action="" class="launch_now">
         {{ csrfInput() }}
-        <input type="hidden" name="action" value="craft-static-dusk/generate/build"/>
+        {{ hiddenInput('action', "craft-static-dusk/generate/build") }}
         {{ hiddenInput('siteHandle', site.handle) }}
         <input type="submit" class="submit btn" value="Launch"/>
     </form>
@@ -133,7 +133,7 @@
     <form method="post" action="" class="schedule" style="display: none">
         {{ csrfInput() }}
         {{ hiddenInput('siteHandle', site.handle) }}
-        <input type="hidden" name="action" value="craft-static-dusk/generate/schedule"/>
+        {{ hiddenInput('action', "craft-static-dusk/generate/schedule") }}
 
         <div class="datetimewrapper">
             <div class="datewrapper">
@@ -154,25 +154,44 @@
     <br>
 
     <h2>Scheduled builds</h2>
-    <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
-        <thead>
-        <tr>
-            <th scope="col" class="code singleline-cell textual fullwidth">Launch time</th>
-            <th scope="col" class="code singleline-cell textual" colspan="1">Remove</th>
-        </tr>
-        </thead>
-        <tbody>
+    <form method="post" action="" id="delete-scheduled-form" >
+        {{ csrfInput() }}
+        {{ hiddenInput('action', "craft-static-dusk/generate/delete") }}
 
-        {% for build in scheduledBuilds %}
-            <tr data-id="0">
-                <td style="text-align: left">
-                    <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
-                </td>
-                <td class="action"><a class="delete icon" title="Delete" aria-label="Delete"></a></td>
+        <input id="buildId" type="hidden" name="id" value="">
+        <input id="launchTime" type="hidden" name="launchTime" value="">
+
+
+        <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
+            <thead>
+            <tr>
+                <th scope="col" class="code singleline-cell textual fullwidth">Launch time</th>
+                <th scope="col" class="code singleline-cell textual" colspan="1">Remove</th>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+
+            {% for build in scheduledBuilds %}
+                <tr data-id="0">
+                    <td style="text-align: left">
+                        <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
+                    </td>
+                    <td class="action">
+                        <button
+                                class="delete icon"
+                                title="Delete"
+                                aria-label="Delete"
+                                type="button"
+                                onclick="handleDeleteBuild(this)"
+                                data-id="{{ build.Id }}"
+                                data-launch-time="{{ build.LaunchTime }}"
+                        ></button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
 
     <br><br>
 
@@ -190,7 +209,6 @@
             <tr data-id="0">
                 <td style="text-align: left; font-size: 16px;">
                     <div style="width: 16px; display: inline-block;">
-
                         {% if build.conclusion == 'success' %}
                             <span data-icon="check" style="color: green;" ></span>
                         {% elseif build.conclusion == 'failure' %}
@@ -198,7 +216,7 @@
                         {% elseif build.conclusion == 'cancelled' %}
                             <span data-icon="alert" style="color: grey;" ></span>
                         {% else %}
-                            <span data-icon="clock" style="color: grey;" ></span>
+                            <span data-icon="clock, time" style="color: grey;" ></span>
                         {% endif %}
                     </div>
                     {{ build.status == 'completed' ? build.conclusion|capitalize : build.status|capitalize }}
@@ -216,6 +234,19 @@
 {% endset %}
 
 {% js %}
+
+
+    function handleDeleteBuild(build) {
+        const form = document.querySelector('#delete-scheduled-form');
+        const idInput = document.querySelector('#buildId');
+        const launchTimeInput = document.querySelector('#launchTime');
+
+        idInput.value = build.dataset.id;
+        launchTimeInput.value = build.dataset.launchTime;
+
+        form.submit();
+    }
+
     function handleRadioChange(radio) {
         const scheduleDiv = document.querySelector('.schedule');
         const launchDiv = document.querySelector('.launch_now');
@@ -228,5 +259,6 @@
             launchDiv.style.display = "none";
         }
     }
+
 
 {% endjs %}
