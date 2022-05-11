@@ -48,6 +48,9 @@
 {# Get all scheduled builds for this site #}
 {% set scheduledBuilds = craft.craftStaticDusk.getScheduledStaticBuilds(site.handle) %}
 
+{# Get all scheduled builds for this site #}
+{% set buildHistory = craft.craftStaticDusk.getBuildHistory(site.handle) %}
+
 {# Content that should appear in the page header #}
 {% set extraPageHeaderHtml %}
     <div class="buttons">
@@ -57,18 +60,13 @@
 
 {# The content of the CP Section #}
 {% set content %}
-    <h2>{{ "Click the button below to generate a new static build."|t('craft-static-dusk') }}</h2>
-
     <p class="textline">This action will build a new static site for production with all the currently published content
         and configuration.</p>
     <p class="textline">The button below will not provide any feedback. Once clicked the site build will take
-        approximately 15 minutes.</p>
+        approximately 15 minutes</p>
     <p class="textline">Test the production site in an incognito browser window to ensure the content is published as
         expected.</p>
     <br>
-
-
-
 
     <h2>Select a site</h2>
     {% set groups = craft.app.sites.getAllGroups() %}
@@ -182,38 +180,53 @@
     <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
         <thead>
         <tr>
-            <th scope="col" class="code singleline-cell textual fullwidth">Status</th>
-            <th scope="col" class="code singleline-cell textual" colspan="1">Start time</th>
+            <th scope="col" class="code singleline-cell textual">Status</th>
+            <th scope="col" class="code singleline-cell textual">Start time</th>
         </tr>
         </thead>
         <tbody>
 
-        {% for build in scheduledBuilds %}
+        {% for build in buildHistory %}
             <tr data-id="0">
-                <td style="text-align: left">
-                    <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
+                <td style="text-align: left; font-size: 16px;">
+                    <div style="width: 16px; display: inline-block;">
+
+                        {% if build.conclusion == 'success' %}
+                            <span data-icon="check" style="color: green;" ></span>
+                        {% elseif build.conclusion == 'failure' %}
+                            <span data-icon="remove" style="color: #E12D39;" ></span>
+                        {% elseif build.conclusion == 'cancelled' %}
+                            <span data-icon="alert" style="color: grey;" ></span>
+                        {% else %}
+                            <span data-icon="clock" style="color: grey;" ></span>
+                        {% endif %}
+                    </div>
+                    {{ build.status == 'completed' ? build.conclusion|capitalize : build.status|capitalize }}
                 </td>
-                <td class="action"><a class="delete icon" title="Delete" aria-label="Delete"></a></td>
+                <td style="text-align: left">
+                    {{ build.started_at|datetime(locale='en-AU') }}
+                </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
 
+
 {% endset %}
 
-    {% js %}
-        function handleRadioChange(radio) {
-            const scheduleDiv = document.querySelector('.schedule');
-            const launchDiv = document.querySelector('.launch_now');
+{% js %}
+    function handleRadioChange(radio) {
+        const scheduleDiv = document.querySelector('.schedule');
+        const launchDiv = document.querySelector('.launch_now');
 
-            if (radio.value === "now") {
-                scheduleDiv.style.display = "none";
-                launchDiv.style.display = "block";
-            } else {
-                scheduleDiv.style.display = "block";
-                launchDiv.style.display = "none";
-            }
+        if (radio.value === "now") {
+            scheduleDiv.style.display = "none";
+            launchDiv.style.display = "block";
+        } else {
+            scheduleDiv.style.display = "block";
+            launchDiv.style.display = "none";
         }
+    }
 
-    {% endjs %}
+{% endjs %}
