@@ -65,68 +65,97 @@
         approximately 15 minutes.</p>
     <p class="textline">Test the production site in an incognito browser window to ensure the content is published as
         expected.</p>
-    <form method="post" action="">
+    <br>
+
+
+
+
+    <h2>Select a site</h2>
+    {% set groups = craft.app.sites.getAllGroups() %}
+    <button type="button" id="context-btn" class="btn menubtn sitemenubtn" data-icon="world">
+        {{ selectedSiteId ? craft.app.sites.getSiteById(selectedSiteId).name|t('site') }}
+    </button>
+    <div class="menu">
+        {% for group in groups %}
+            {% set groupSiteIds = group.getSiteIds()|intersect(siteIds) %}
+            {% if groupSiteIds %}
+                {% if groups|length > 1 %}<h6>{{ group.name|t('site') }}</h6>{% endif %}
+                <ul class="padded">
+                    {% for siteId in groupSiteIds %}
+                        {% set site = craft.app.sites.getSiteById(siteId) %}
+                        <li>
+                            <a{% if selectedSiteId and siteId == selectedSiteId %} class="sel"{% endif %}
+                                    data-site-id="{{ siteId }}" href="?site={{ site.id }}">
+                                {{ site.name|t('site') }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <br>
+    <br>
+
+    <h2>When do you want to launch the build?</h2>
+    <div>
+        <input
+                type="radio"
+                id="launch_now"
+                name="when_launch"
+                value="now"
+                class="radio"
+                checked
+                onclick="handleRadioChange(this)"
+        >
+        <label for="launch_now">Now</label>
+        <br>
+        <input
+                type="radio"
+                id="launch_later"
+                name="when_launch"
+                value="later"
+                class="radio"
+                onclick="handleRadioChange(this)"
+        >
+        <label for="launch_later">Schedule for later</label>
+    </div>
+
+    <br>
+
+
+
+    <form method="post" action="" class="launch_now">
         {{ csrfInput() }}
         <input type="hidden" name="action" value="craft-static-dusk/generate/build"/>
-
-        {% if siteIds|length %}
-            {{ hiddenInput('siteHandle', site.handle) }}
-
-            {% set groups = craft.app.sites.getAllGroups() %}
-            <button type="button" id="context-btn" class="btn menubtn sitemenubtn" data-icon="world">
-                {{ selectedSiteId ? craft.app.sites.getSiteById(selectedSiteId).name|t('site') }}
-            </button>
-            <div class="menu">
-                {% for group in groups %}
-                    {% set groupSiteIds = group.getSiteIds()|intersect(siteIds) %}
-                    {% if groupSiteIds %}
-                        {% if groups|length > 1 %}<h6>{{ group.name|t('site') }}</h6>{% endif %}
-                        <ul class="padded">
-                            {% for siteId in groupSiteIds %}
-                                {% set site = craft.app.sites.getSiteById(siteId) %}
-                                <li>
-                                    <a{% if selectedSiteId and siteId == selectedSiteId %} class="sel"{% endif %}
-                                            data-site-id="{{ siteId }}" href="?site={{ site.id }}">
-                                        {{ site.name|t('site') }}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <input type="submit" class="submit btn" value="Launch Site Build"/>
-
+        {{ hiddenInput('siteHandle', site.handle) }}
+        <input type="submit" class="submit btn" value="Launch"/>
     </form>
 
-    <br><br>
-
-    <h2>Schedule a static build</h2>
-    <form method="post" action="">
+    <form method="post" action="" class="schedule" style="display: none">
         {{ csrfInput() }}
         {{ hiddenInput('siteHandle', site.handle) }}
         <input type="hidden" name="action" value="craft-static-dusk/generate/schedule"/>
 
-        <div class="flex">
-            <div class="datetimewrapper">
-                <div class="datewrapper">
-                    <input type="text" class="text hasDatepicker" name="scheduleDate" value="08/08/2022" size="10"
-                           autocomplete="off" placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
-                    <div data-icon="date"></div>
-                </div>
-                <div class="timewrapper"><input type="text" id="postDate-time" class="text ui-timepicker-input"
-                                                name="scheduleTime" value="16:50" size="10" autocomplete="off"
-                                                placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
-                    <div data-icon="time"></div>
-                    <input type="hidden" name="scheduleTime" value="16:50"></div>
+        <div class="datetimewrapper">
+            <div class="datewrapper">
+                <input type="text" class="text hasDatepicker" name="scheduleDate" value="08/08/2022" size="10"
+                       autocomplete="off" placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
+                <div data-icon="date"></div>
             </div>
-            <input type="submit" class="secondary btn" value="Schedule Build"/>
+            <div class="timewrapper"><input type="text" id="postDate-time" class="text ui-timepicker-input"
+                                            name="scheduleTime" value="16:50" size="10" autocomplete="off"
+                                            placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
+                <div data-icon="time"></div>
+                <input type="hidden" name="scheduleTime" value="16:50"></div>
         </div>
+        <br>
+        <input type="submit" class="submit btn" value="Schedule"/>
     </form>
 
-    <h2>Upcoming static builds</h2>
+    <br>
+
+    <h2>Scheduled builds</h2>
     <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
         <thead>
         <tr>
@@ -149,6 +178,42 @@
 
     <br><br>
 
+    <h2>Past builds</h2>
+    <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
+        <thead>
+        <tr>
+            <th scope="col" class="code singleline-cell textual fullwidth">Status</th>
+            <th scope="col" class="code singleline-cell textual" colspan="1">Start time</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for build in scheduledBuilds %}
+            <tr data-id="0">
+                <td style="text-align: left">
+                    <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
+                </td>
+                <td class="action"><a class="delete icon" title="Delete" aria-label="Delete"></a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
 
 {% endset %}
 
+    {% js %}
+        function handleRadioChange(radio) {
+            const scheduleDiv = document.querySelector('.schedule');
+            const launchDiv = document.querySelector('.launch_now');
+
+            if (radio.value === "now") {
+                scheduleDiv.style.display = "none";
+                launchDiv.style.display = "block";
+            } else {
+                scheduleDiv.style.display = "block";
+                launchDiv.style.display = "none";
+            }
+        }
+
+    {% endjs %}
