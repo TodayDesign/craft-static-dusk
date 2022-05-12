@@ -108,7 +108,10 @@ class GenerateController extends Controller
 
         $scheduleDate = Craft::$app->request->post("scheduleDate");
         $scheduleTime = Craft::$app->request->post("scheduleTime");
-        $launchTime = strtotime($scheduleDate . " " . $scheduleTime);
+
+        // Format time in Australian format
+        $formattedTime = str_replace("/", "-", $scheduleDate . " " . $scheduleTime);
+        $launchTime = strtotime($formattedTime);
 
 
         $curl = curl_init();
@@ -176,7 +179,7 @@ class GenerateController extends Controller
 
         curl_setopt_array($curl, array(
            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl) . "/scheduled",
-            CURLOPT_URL => "http://host.docker.internal:3000/static-build/scheduled",
+//             CURLOPT_URL => "http://host.docker.internal:3000/static-build/scheduled",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -190,10 +193,6 @@ class GenerateController extends Controller
                 "Content-Type: application/json"
             ),
         ));
-
-        $file = Craft::getAlias('@storage/logs/pluginhandle.log');
-        $log = date('Y-m-d H:i:s').' '. json_encode($payload, JSON_PRETTY_PRINT) ."\n";
-        FileHelper::writeToFile($file, $log, ['append' => true]);
 
         $response = curl_exec($curl);
         $response = json_decode($response);
