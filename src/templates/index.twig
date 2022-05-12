@@ -98,23 +98,23 @@
     <h2>When do you want to launch the build?</h2>
     <div>
         <input
-                type="radio"
-                id="launch_now"
-                name="when_launch"
-                value="now"
-                class="radio"
-                checked
-                onclick="handleRadioChange(this)"
+            type="radio"
+            id="launch_now"
+            name="when_launch"
+            value="now"
+            class="radio"
+            checked
+            onclick="handleRadioChange(this)"
         >
         <label for="launch_now">Now</label>
         <br>
         <input
-                type="radio"
-                id="launch_later"
-                name="when_launch"
-                value="later"
-                class="radio"
-                onclick="handleRadioChange(this)"
+            type="radio"
+            id="launch_later"
+            name="when_launch"
+            value="later"
+            class="radio"
+            onclick="handleRadioChange(this)"
         >
         <label for="launch_later">Schedule for later</label>
     </div>
@@ -137,15 +137,17 @@
 
         <div class="datetimewrapper">
             <div class="datewrapper">
-                <input type="text" class="text hasDatepicker" name="scheduleDate" value="08/08/2022" size="10"
+                <input id="scheduleDate" type="text" class="text hasDatepicker" name="scheduleDate" value="08/08/2022" size="10"
                        autocomplete="off" placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
                 <div data-icon="date"></div>
             </div>
-            <div class="timewrapper"><input type="text" id="postDate-time" class="text ui-timepicker-input"
+            <div class="timewrapper">
+                <input id="scheduleTime"
+                        type="text" id="postDate-time" class="text ui-timepicker-input"
                                             name="scheduleTime" value="16:50" size="10" autocomplete="off"
                                             placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
                 <div data-icon="time"></div>
-                <input type="hidden" name="scheduleTime" value="16:50"></div>
+            </div>
         </div>
         <br>
         <input type="submit" class="submit btn" value="Schedule"/>
@@ -178,14 +180,14 @@
                     </td>
                     <td class="action">
                         <button
-                                class="delete icon"
-                                title="Delete"
-                                aria-label="Delete"
-                                type="button"
-                                onclick="handleDeleteBuild(this)"
-                                data-id="{{ build.Id }}"
-                                data-launch-time="{{ build.LaunchTime }}"
-                        ></button>
+                            class="delete icon"
+                            title="Delete"
+                            aria-label="Delete"
+                            type="button"
+                            onclick="handleDeleteBuild(this)"
+                            data-id="{{ build.Id }}"
+                            data-launch-time="{{ build.LaunchTime }}"
+                        >
                     </td>
                 </tr>
             {% endfor %}
@@ -198,10 +200,10 @@
     <h2>Past builds</h2>
     <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
         <thead>
-        <tr>
-            <th scope="col" class="code singleline-cell textual">Status</th>
-            <th scope="col" class="code singleline-cell textual">Start time</th>
-        </tr>
+            <tr>
+                <th scope="col" class="code singleline-cell textual">Status</th>
+                <th scope="col" class="code singleline-cell textual">Start time</th>
+            </tr>
         </thead>
         <tbody>
 
@@ -235,16 +237,15 @@
 
 {% js %}
 
-
     function handleDeleteBuild(build) {
-        const form = document.querySelector('#delete-scheduled-form');
-        const idInput = document.querySelector('#buildId');
-        const launchTimeInput = document.querySelector('#launchTime');
+       const form = document.querySelector('#delete-scheduled-form');
+       const idInput = document.querySelector('#buildId');
+       const launchTimeInput = document.querySelector('#launchTime');
 
-        idInput.value = build.dataset.id;
-        launchTimeInput.value = build.dataset.launchTime;
+       idInput.value = build.dataset.id;
+       launchTimeInput.value = build.dataset.launchTime;
 
-        form.submit();
+       form.submit();
     }
 
     function handleRadioChange(radio) {
@@ -259,6 +260,17 @@
             launchDiv.style.display = "none";
         }
     }
+
+
+    (function init (){
+        const scheduleTimeInput = document.querySelector('#scheduleTime');
+        const scheduleDateInput = document.querySelector('#scheduleDate');
+
+        const date = new Date();
+        scheduleTimeInput.value = date.toLocaleTimeString();
+        scheduleDateInput.value = date.toLocaleDateString('en-AU');
+    })();
+
 
 
 {% endjs %}
