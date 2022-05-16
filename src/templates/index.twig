@@ -62,7 +62,7 @@
 {% set content %}
     <p class="textline">This action will build a new static site for production with all the currently published content
         and configuration.</p>
-    <p class="textline">The button below will not provide any feedback. Once clicked the site build will take
+    <p class="textline">Once clicked the site build will take
         approximately 15 minutes</p>
     <p class="textline">Test the production site in an incognito browser window to ensure the content is published as
         expected.</p>
@@ -198,6 +198,7 @@
     <br><br>
 
     <h2>Past builds</h2>
+    <p>Note: This list includes all sites</p>
     <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
         <thead>
             <tr>
@@ -218,7 +219,7 @@
                         {% elseif build.conclusion == 'cancelled' %}
                             <span data-icon="alert" style="color: grey;" ></span>
                         {% else %}
-                            <span data-icon="clock, time" style="color: grey;" ></span>
+                            <span data-icon="time" style="color: grey;" ></span>
                         {% endif %}
                     </div>
                     {{ build.status == 'completed' ? build.conclusion|capitalize : build.status|capitalize }}
