@@ -10,9 +10,11 @@
 
 namespace todaydesign\craftstaticdusk\variables;
 
+use craft\helpers\FileHelper;
 use todaydesign\craftstaticdusk\CraftStaticDusk;
 
 use Craft;
+use todaydesign\craftstaticdusk\managers\StaticBuildManager;
 
 /**
  * Craft Static Dusk Variable
@@ -32,25 +34,26 @@ class CraftStaticDuskVariable
     // =========================================================================
 
     /**
-     * Whatever you want to output to a Twig template can go into a Variable method.
-     * You can have as many variable functions as you want.  From any Twig template,
-     * call it like this:
+     * Get scheduled static builds for this environment
      *
-     *     {{ craft.craftStaticDusk.exampleVariable }}
-     *
-     * Or, if your variable requires parameters from Twig:
-     *
-     *     {{ craft.craftStaticDusk.exampleVariable(twigValue) }}
-     *
-     * @param null $optional
-     * @return string
+     * @return mixed
      */
-    public function exampleVariable($optional = null)
+    public function getScheduledStaticBuilds($site)
     {
-        $result = "And away we go to the Twig template...";
-        if ($optional) {
-            $result = "I'm feeling optional today...";
-        }
-        return $result;
+        $manager = new StaticBuildManager();
+        $results = $manager->getScheduledBuilds($site);
+        return $results;
+    }
+
+    /**
+     * Get build history for this environment
+     *
+     * @return mixed
+     */
+    public function getBuildHistory($site)
+    {
+        $manager = new StaticBuildManager();
+        $results = $manager->getBuildHistory($site);
+        return $results;
     }
 }

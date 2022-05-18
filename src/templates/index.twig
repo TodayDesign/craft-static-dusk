@@ -23,7 +23,7 @@
 {% set docsUrl = "https://github.com/TodayDesign/craft-static-dusk/blob/master/README.md" %}
 
 {# The title of this CP section #}
-{% set title = "Static Dusk - Site builder" %}
+{% set title = "Publish website" %}
 
 {# The URL to this plugin's base CP section #}
 {% set pluginCpUrl = url('craft-static-dusk') %}
@@ -32,68 +32,247 @@
 {% set iconUrl = view.getAssetManager().getPublishedUrl('@todaydesign/craftstaticdusk/assetbundles/indexcpsection/dist', true) ~ '/img/Index-icon.svg' %}
 
 
-{# Get all sites #}
-{% set sites = craft.app.sites.allSites %}
 
-{# Content that should appear in the page header#}
+{% set siteIds = siteIds ?? craft.app.sites.getEditableSiteIds() %}
+
+{% if selectedSiteId is not defined %}
+    {% if craft.request.getQuery('site') %}
+        {% set selectedSiteId = craft.request.getQuery('site') %}
+    {% else %}
+        {% set selectedSiteId = siteIds|first %}
+    {% endif %}
+{% endif %}
+
+{% set site = craft.app.sites.getSiteById(selectedSiteId) %}
+
+{# Get all scheduled builds for this site #}
+{% set scheduledBuilds = craft.craftStaticDusk.getScheduledStaticBuilds(site.handle) %}
+
+{# Get all scheduled builds for this site #}
+{% set buildHistory = craft.craftStaticDusk.getBuildHistory(site.handle) %}
+
+{# Content that should appear in the page header #}
 {% set extraPageHeaderHtml %}
     <div class="buttons">
         <a href="{{ pluginCpUrl }}" class="btn submit add icon">{{ "Click Me!"|t('craft-static-dusk') }}</a>
     </div>
 {% endset %}
 
-{# The content of the CP Section#}
+{# The content of the CP Section #}
 {% set content %}
-    <h2>{{ "Click the button below to generate a new static build."|t('craft-static-dusk') }}</h2>
+    <p class="textline">This action will build a new static site for production with all the currently published content
+        and configuration.</p>
+    <p class="textline">Once clicked the site build will take
+        approximately 15 minutes</p>
+    <p class="textline">Test the production site in an incognito browser window to ensure the content is published as
+        expected.</p>
+    <br>
 
-    <p class="textline">This action will build a new static site for production with all the currently published content and configuration.</p>
-    <p class="textline">The button below will not provide any feedback. Once clicked the site build will take approximately 15 minutes.</p>
-    <p class="textline">Test the production site in an incognito browser window to ensure the content is published as expected.</p>
-    <form method="post" action="">
-        {{csrfInput()}}
-        <input type="hidden" name="action" value="craft-static-dusk/generate/build" />
-
-        {% set siteIds = siteIds ?? craft.app.sites.getEditableSiteIds() %}
-        {% if siteIds|length %}
-
-            {% if selectedSiteId is not defined %}
-                {% if craft.request.getQuery('site') %}
-                    {% set selectedSiteId = craft.request.getQuery('site') %}
-                {% else %}
-                    {% set selectedSiteId = siteIds|first %}
-                {% endif %}
+    <h2>Select a site</h2>
+    {% set groups = craft.app.sites.getAllGroups() %}
+    <button type="button" id="context-btn" class="btn menubtn sitemenubtn" data-icon="world">
+        {{ selectedSiteId ? craft.app.sites.getSiteById(selectedSiteId).name|t('site') }}
+    </button>
+    <div class="menu">
+        {% for group in groups %}
+            {% set groupSiteIds = group.getSiteIds()|intersect(siteIds) %}
+            {% if groupSiteIds %}
+                {% if groups|length > 1 %}<h6>{{ group.name|t('site') }}</h6>{% endif %}
+                <ul class="padded">
+                    {% for siteId in groupSiteIds %}
+                        {% set site = craft.app.sites.getSiteById(siteId) %}
+                        <li>
+                            <a{% if selectedSiteId and siteId == selectedSiteId %} class="sel"{% endif %}
+                                    data-site-id="{{ siteId }}" href="?site={{ site.id }}">
+                                {{ site.name|t('site') }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
             {% endif %}
+        {% endfor %}
+    </div>
+    <br>
+    <br>
 
-            {% set site = craft.app.sites.getSiteById(selectedSiteId) %}
-            {{ hiddenInput('siteHandle', site.handle) }}
+    <h2>When do you want to launch the build?</h2>
+    <div>
+        <input
+            type="radio"
+            id="launch_now"
+            name="when_launch"
+            value="now"
+            class="radio"
+            checked
+            onclick="handleRadioChange(this)"
+        >
+        <label for="launch_now">Now</label>
+        <br>
+        <input
+            type="radio"
+            id="launch_later"
+            name="when_launch"
+            value="later"
+            class="radio"
+            onclick="handleRadioChange(this)"
+        >
+        <label for="launch_later">Schedule for later</label>
+    </div>
 
-            {% set groups = craft.app.sites.getAllGroups() %}
-            <button type="button" id="context-btn" class="btn menubtn sitemenubtn" data-icon="world">
-                {{ selectedSiteId ? craft.app.sites.getSiteById(selectedSiteId).name|t('site') }}
-            </button>
-            <div class="menu">
-                {% for group in groups %}
-                    {% set groupSiteIds = group.getSiteIds()|intersect(siteIds) %}
-                    {% if groupSiteIds %}
-                        {% if groups|length > 1 %}<h6>{{ group.name|t('site') }}</h6>{% endif %}
-                        <ul class="padded">
-                            {% for siteId in groupSiteIds %}
-                                {% set site = craft.app.sites.getSiteById(siteId) %}
-                                <li>
-                                    <a{% if selectedSiteId and siteId == selectedSiteId %} class="sel"{% endif %}
-                                            data-site-id="{{ siteId }}" href="?site={{ site.id }}">
-                                        {{ site.name|t('site') }}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endif %}
+    <br>
 
-        <input type="submit" class="submit btn" value="Generate Site Build" />
+
+
+    <form method="post" action="" class="launch_now">
+        {{ csrfInput() }}
+        {{ hiddenInput('action', "craft-static-dusk/generate/build") }}
+        {{ hiddenInput('siteHandle', site.handle) }}
+        <input type="submit" class="submit btn" value="Launch"/>
     </form>
+
+    <form method="post" action="" class="schedule" style="display: none">
+        {{ csrfInput() }}
+        {{ hiddenInput('siteHandle', site.handle) }}
+        {{ hiddenInput('action', "craft-static-dusk/generate/schedule") }}
+
+        <div class="datetimewrapper">
+            <div class="datewrapper">
+                <input id="scheduleDate" type="text" class="text hasDatepicker" name="scheduleDate" value="08/08/2022" size="10"
+                       autocomplete="off" placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
+                <div data-icon="date"></div>
+            </div>
+            <div class="timewrapper">
+                <input id="scheduleTime"
+                        type="text" id="postDate-time" class="text ui-timepicker-input"
+                                            name="scheduleTime" value="16:50" size="10" autocomplete="off"
+                                            placeholder=" " dir="ltr" aria-describedby="postDate-instructions">
+                <div data-icon="time"></div>
+            </div>
+        </div>
+        <br>
+        <input type="submit" class="submit btn" value="Schedule"/>
+    </form>
+
+    <br>
+
+    <h2>Scheduled builds</h2>
+    <form method="post" action="" id="delete-scheduled-form" >
+        {{ csrfInput() }}
+        {{ hiddenInput('action', "craft-static-dusk/generate/delete") }}
+
+        <input id="buildId" type="hidden" name="id" value="">
+        <input id="launchTime" type="hidden" name="launchTime" value="">
+
+
+        <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
+            <thead>
+            <tr>
+                <th scope="col" class="code singleline-cell textual fullwidth">Launch time</th>
+                <th scope="col" class="code singleline-cell textual" colspan="1">Remove</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for build in scheduledBuilds %}
+                <tr data-id="0">
+                    <td style="text-align: left">
+                        <p>{{ build.LaunchTime|datetime(locale='en-AU') }}</p>
+                    </td>
+                    <td class="action">
+                        <button
+                            class="delete icon"
+                            title="Delete"
+                            aria-label="Delete"
+                            type="button"
+                            onclick="handleDeleteBuild(this)"
+                            data-id="{{ build.Id }}"
+                            data-launch-time="{{ build.LaunchTime }}"
+                        >
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+
+    <br><br>
+
+    <h2>Past builds</h2>
+    <p>This list includes all sites</p>
+    <p>Please refresh the page to update the list</p>
+    <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
+        <thead>
+            <tr>
+                <th scope="col" class="code singleline-cell textual">Status</th>
+                <th scope="col" class="code singleline-cell textual">Start time</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        {% for build in buildHistory %}
+            <tr data-id="0">
+                <td style="text-align: left; font-size: 16px;">
+                    <div style="width: 16px; display: inline-block;">
+                        {% if build.conclusion == 'success' %}
+                            <span data-icon="check" style="color: green;" ></span>
+                        {% elseif build.conclusion == 'failure' %}
+                            <span data-icon="remove" style="color: #E12D39;" ></span>
+                        {% elseif build.conclusion == 'cancelled' %}
+                            <span data-icon="alert" style="color: grey;" ></span>
+                        {% else %}
+                            <span data-icon="time" style="color: grey;" ></span>
+                        {% endif %}
+                    </div>
+                    {{ build.status == 'completed' ? build.conclusion|capitalize : build.status|capitalize }}
+                </td>
+                <td style="text-align: left">
+                    {{ build.started_at|datetime(locale='en-AU') }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
 
 {% endset %}
 
+{% js %}
+
+    function handleDeleteBuild(build) {
+       const form = document.querySelector('#delete-scheduled-form');
+       const idInput = document.querySelector('#buildId');
+       const launchTimeInput = document.querySelector('#launchTime');
+
+       idInput.value = build.dataset.id;
+       launchTimeInput.value = build.dataset.launchTime;
+
+       form.submit();
+    }
+
+    function handleRadioChange(radio) {
+        const scheduleDiv = document.querySelector('.schedule');
+        const launchDiv = document.querySelector('.launch_now');
+
+        if (radio.value === "now") {
+            scheduleDiv.style.display = "none";
+            launchDiv.style.display = "block";
+        } else {
+            scheduleDiv.style.display = "block";
+            launchDiv.style.display = "none";
+        }
+    }
+
+
+    (function init (){
+        const scheduleTimeInput = document.querySelector('#scheduleTime');
+        const scheduleDateInput = document.querySelector('#scheduleDate');
+
+        const date = new Date();
+        scheduleTimeInput.value = date.toLocaleTimeString();
+        scheduleDateInput.value = date.toLocaleDateString('en-AU');
+    })();
+
+
+
+{% endjs %}
