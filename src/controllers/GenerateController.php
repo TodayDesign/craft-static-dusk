@@ -111,7 +111,7 @@ class GenerateController extends Controller
 
         // Format time in Australian format
         $formattedTime = str_replace("/", "-", $scheduleDate . " " . $scheduleTime);
-        $launchTime = strtotime($formattedTime);
+        $launchTime = strtotime($formattedTime) * 1000; // Multiple by 1000 to convert to milliseconds
 
 
         $curl = curl_init();
@@ -165,7 +165,7 @@ class GenerateController extends Controller
         $settings = CraftStaticDusk::$plugin->getSettings();
 
         $id = Craft::$app->request->post("id");
-        $launchTime = Craft::$app->request->post("launchTime");
+        $launchTime = Craft::$app->request->post("launchTime") * 1000; // Multiple by 1000 to convert to milliseconds
 
 
         $curl = curl_init();

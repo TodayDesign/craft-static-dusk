@@ -80,11 +80,11 @@
                 {% if groups|length > 1 %}<h6>{{ group.name|t('site') }}</h6>{% endif %}
                 <ul class="padded">
                     {% for siteId in groupSiteIds %}
-                        {% set site = craft.app.sites.getSiteById(siteId) %}
+                        {% set siteOption = craft.app.sites.getSiteById(siteId) %}
                         <li>
                             <a{% if selectedSiteId and siteId == selectedSiteId %} class="sel"{% endif %}
-                                    data-site-id="{{ siteId }}" href="?site={{ site.id }}">
-                                {{ site.name|t('site') }}
+                                    data-site-id="{{ siteId }}" href="?site={{ siteOption.id }}">
+                                {{ siteOption.name|t('site') }}
                             </a>
                         </li>
                     {% endfor %}
@@ -187,7 +187,8 @@
                             onclick="handleDeleteBuild(this)"
                             data-id="{{ build.Id }}"
                             data-launch-time="{{ build.LaunchTime }}"
-                        >
+                            style="cursor: pointer; background-color: transparent; border: none;"
+                        ></button>
                     </td>
                 </tr>
             {% endfor %}
@@ -238,6 +239,10 @@
 {% endset %}
 
 {% js %}
+    // Stop form resubmitting on refresh
+    if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
 
     function handleDeleteBuild(build) {
        const form = document.querySelector('#delete-scheduled-form');

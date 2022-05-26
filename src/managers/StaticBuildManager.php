@@ -47,6 +47,13 @@ class StaticBuildManager {
         curl_close($curl);
 
         if (array_key_exists("responseObject", $response)) {
+
+            // Convert unix milliseconds to seconds
+            $data = array_map(function ($build) {
+                $build->LaunchTime = $build->LaunchTime / 1000;
+                return $build;
+            }, $response->responseObject);
+
             return $response->responseObject;
         }
 
@@ -62,11 +69,12 @@ class StaticBuildManager {
     public function getBuildHistory($site)
     {
         $settings = CraftStaticDusk::$plugin->getSettings();
+        $ref = str_replace("refs/heads/", "", Craft::parseEnv($settings->gitRef));
 
         $payload = [
             'secret' => Craft::parseEnv($settings->webHookSecret),
             'repo' => Craft::parseEnv($settings->gitRepo),
-            'ref' => Craft::parseEnv($settings->gitRef),
+            'ref' => $ref,
             'site' => $site
         ];
 
