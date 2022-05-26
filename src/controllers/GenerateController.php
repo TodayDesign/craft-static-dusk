@@ -111,7 +111,7 @@ class GenerateController extends Controller
 
         // Format time in Australian format
         $formattedTime = str_replace("/", "-", $scheduleDate . " " . $scheduleTime);
-        $launchTime = strtotime($formattedTime);
+        $launchTime = strtotime($formattedTime) * 1000; // Multiple by 1000 to convert to milliseconds
 
 
         $curl = curl_init();
