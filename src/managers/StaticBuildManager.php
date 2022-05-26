@@ -69,11 +69,12 @@ class StaticBuildManager {
     public function getBuildHistory($site)
     {
         $settings = CraftStaticDusk::$plugin->getSettings();
+        $ref = str_replace("refs/heads/", "", Craft::parseEnv($settings->gitRef));
 
         $payload = [
             'secret' => Craft::parseEnv($settings->webHookSecret),
             'repo' => Craft::parseEnv($settings->gitRepo),
-            'ref' => Craft::parseEnv($settings->gitRef),
+            'ref' => $ref,
             'site' => $site
         ];
 
