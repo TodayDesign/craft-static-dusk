@@ -47,6 +47,13 @@ class StaticBuildManager {
         curl_close($curl);
 
         if (array_key_exists("responseObject", $response)) {
+
+            // Convert unix milliseconds to seconds
+            $data = array_map(function ($build) {
+                $build->LaunchTime = $build->LaunchTime / 1000;
+                return $build;
+            }, $response->responseObject);
+
             return $response->responseObject;
         }
 
