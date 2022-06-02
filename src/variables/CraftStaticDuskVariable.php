@@ -72,7 +72,7 @@ class CraftStaticDuskVariable
         $environmentName = Craft::parseEnv($settings->environmentName);
         $webHookUrl = Craft::parseEnv($settings->webHookUrl);
 
-        return empty($webHookSecret) || empty($gitRepo) || empty($gitRef) || empty($environmentName) || $webHookUrl;
+        return empty($webHookSecret) || empty($gitRepo) || empty($gitRef) || empty($environmentName) || empty($webHookUrl);
     }
 
 }
