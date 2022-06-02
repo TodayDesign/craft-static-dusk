@@ -51,6 +51,8 @@
 {# Get all scheduled builds for this site #}
 {% set buildHistory = craft.craftStaticDusk.getBuildHistory(site.handle) %}
 
+{% set isMissingEnvVariables = craft.craftStaticDusk.isMissingEnvVariables() %}
+
 {# Content that should appear in the page header #}
 {% set extraPageHeaderHtml %}
     <div class="buttons">
@@ -60,6 +62,16 @@
 
 {# The content of the CP Section #}
 {% set content %}
+    {%  if isMissingEnvVariables %}
+        <ul id="alerts" style="margin-top: 0px;" class="">
+            <li><h2><span data-icon="alert" aria-label="Error"></span><strong>Warning:</strong> Missing environment variables</h2>
+            </li>
+            <li>
+                Make sure that the environment variables <strong>webHookSecret, webHookUrl, gitRepo, gitRef</strong> and <strong>environmentName</strong> are set in the project.yaml and are correctly set in the CI
+            </li>
+        </ul>
+    {% endif %}
+
     <p class="textline">This action will build a new static site for production with all the currently published content
         and configuration.</p>
     <p class="textline">Once clicked the site build will take

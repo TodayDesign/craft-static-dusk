@@ -56,4 +56,23 @@ class CraftStaticDuskVariable
         $results = $manager->getBuildHistory($site);
         return $results;
     }
+
+    /**
+     * Check if Environment variables are missing
+     *
+     * @return boolean
+     */
+    public function isMissingEnvVariables()
+    {
+        $settings = CraftStaticDusk::$plugin->getSettings();
+
+        $webHookSecret = Craft::parseEnv($settings->webHookSecret);
+        $gitRepo = Craft::parseEnv($settings->gitRepo);
+        $gitRef = Craft::parseEnv($settings->gitRef);
+        $environmentName = Craft::parseEnv($settings->environmentName);
+        $webHookUrl = Craft::parseEnv($settings->webHookUrl);
+
+        return empty($webHookSecret) || empty($gitRepo) || empty($gitRef) || empty($environmentName) || $webHookUrl;
+    }
+
 }
