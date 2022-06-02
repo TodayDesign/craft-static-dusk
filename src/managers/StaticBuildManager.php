@@ -46,7 +46,7 @@ class StaticBuildManager {
 
         curl_close($curl);
 
-        if (array_key_exists("responseObject", $response)) {
+        if (property_exists($response, "responseObject")) {
 
             // Convert unix milliseconds to seconds
             $data = array_map(function ($build) {
@@ -99,7 +99,7 @@ class StaticBuildManager {
 
         curl_close($curl);
 
-        if (array_key_exists("responseObject", $response)) {
+        if (property_exists($response, "responseObject")) {
             return $response->responseObject;
         }
 
