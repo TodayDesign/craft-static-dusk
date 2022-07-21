@@ -15,6 +15,7 @@ use todaydesign\craftstaticdusk\variables\CraftStaticDuskVariable;
 use todaydesign\craftstaticdusk\models\Settings;
 
 use Craft;
+use craft\base\Model;
 use craft\base\Plugin;
 use craft\services\Plugins;
 use craft\events\PluginEvent;
@@ -174,7 +175,7 @@ class CraftStaticDusk extends Plugin
      *
      * @return \craft\base\Model|null
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?Model
     {
         return new Settings();
     }
