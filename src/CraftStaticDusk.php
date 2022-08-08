@@ -11,8 +11,8 @@
 namespace todaydesign\craftstaticdusk;
 
 use todaydesign\craftstaticdusk\services\CraftStaticDuskService as CraftStaticDuskServiceService;
-use todaydesign\craftstaticdusk\managers\StaticBuildManager;
 use todaydesign\craftstaticdusk\variables\CraftStaticDuskVariable;
+use todaydesign\craftstaticdusk\jobs\StaticBuildIncremental as StaticBuildIncrementalJob;
 use todaydesign\craftstaticdusk\models\Settings;
 
 use Craft;
@@ -145,7 +145,6 @@ class CraftStaticDusk extends Plugin
             Elements::class,
             Elements::EVENT_AFTER_SAVE_ELEMENT,
             function (Event $event) {
-                $staticBuildManager = new StaticBuildManager();
 
                 $element = $event->element;
 
@@ -154,12 +153,13 @@ class CraftStaticDusk extends Plugin
 
                 if ($isEntry && $isNotDraft) {
 
-                    $payload = [
-                        "site" => $element->siteId,
-                        "pageUri" => $element->uri
-                    ];
+                    $queue = Craft::$app->getQueue();
+                    $jobId = $queue->push(new StaticBuildIncrementalJob([
+                        'description' => Craft::t('craft-static-dusk', 'Running incremental static build on page "' . $element->uri . '"'),
+                        'siteHandle' => Craft::$app->getSites()->currentSite->handle,
+                        'pageUri' => $element->uri,
+                    ]));
 
-                    $staticBuildManager->launchIncrementalBuild($payload);
                 }
             }
         );

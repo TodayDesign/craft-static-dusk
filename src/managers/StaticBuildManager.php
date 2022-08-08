@@ -107,7 +107,7 @@ class StaticBuildManager {
     }
 
 
-    public function launchIncrementalBuild($payload)
+    public function launchIncrementalBuild($siteHandle, $pageUri)
     {
 
         $isMissingEnvVariables = $this->isMissingEnvVariables();
@@ -129,8 +129,8 @@ class StaticBuildManager {
                 'repo' => Craft::parseEnv($settings->gitRepo),
                 'ref' => Craft::parseEnv($settings->gitRef),
                 'envName' => Craft::parseEnv($settings->environmentName),
-                'site' => $payload["site"],
-                'incrementalBuildUri' => $payload["pageUri"],
+                'site' => $siteHandle,
+                'incrementalBuildUri' => $pageUri,
             ]);
         }
 
