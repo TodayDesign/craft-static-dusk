@@ -36,8 +36,8 @@
 {% set siteIds = siteIds ?? craft.app.sites.getEditableSiteIds() %}
 
 {% if selectedSiteId is not defined %}
-    {% if craft.request.getQuery('site') %}
-        {% set selectedSiteId = craft.request.getQuery('site') %}
+    {% if craft.app.request.getQueryParam('site') %}
+        {% set selectedSiteId = craft.app.request.getQueryParam('site') %}
     {% else %}
         {% set selectedSiteId = siteIds|first %}
     {% endif %}
