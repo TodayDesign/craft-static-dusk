@@ -15,8 +15,8 @@ use todaydesign\craftstaticdusk\variables\CraftStaticDuskVariable;
 use todaydesign\craftstaticdusk\models\Settings;
 
 use Craft;
-use craft\base\Model;
 use craft\base\Plugin;
+use craft\base\Model;
 use craft\services\Plugins;
 use craft\events\PluginEvent;
 use craft\web\UrlManager;
@@ -195,4 +195,5 @@ class CraftStaticDusk extends Plugin
             ]
         );
     }
+
 }
