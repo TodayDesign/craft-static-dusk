@@ -12,6 +12,7 @@ namespace todaydesign\craftstaticdusk;
 
 use todaydesign\craftstaticdusk\services\CraftStaticDuskService as CraftStaticDuskServiceService;
 use todaydesign\craftstaticdusk\variables\CraftStaticDuskVariable;
+use todaydesign\craftstaticdusk\jobs\StaticBuildIncremental as StaticBuildIncrementalJob;
 use todaydesign\craftstaticdusk\models\Settings;
 
 use Craft;
@@ -21,6 +22,11 @@ use craft\events\PluginEvent;
 use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
 use craft\events\RegisterUrlRulesEvent;
+use craft\helpers\ElementHelper;
+use craft\services\Elements;
+
+use craft\helpers\FileHelper;
+
 
 use yii\base\Event;
 
@@ -129,6 +135,31 @@ class CraftStaticDusk extends Plugin
             function (PluginEvent $event) {
                 if ($event->plugin === $this) {
                     // We were just installed
+                }
+            }
+        );
+
+
+        // Run incremental static build on save
+        Event::on(
+            Elements::class,
+            Elements::EVENT_AFTER_SAVE_ELEMENT,
+            function (Event $event) {
+
+                $element = $event->element;
+
+                $isNotDraft = ElementHelper::isDraftOrRevision($element);
+                $isEntry = $element instanceof craft\elements\Entry;
+
+                if ($isEntry && $isNotDraft) {
+
+                    $queue = Craft::$app->getQueue();
+                    $jobId = $queue->push(new StaticBuildIncrementalJob([
+                        'description' => Craft::t('craft-static-dusk', 'Running incremental static build on page "' . $element->uri . '"'),
+                        'siteHandle' => Craft::$app->getSites()->currentSite->handle,
+                        'pageUri' => $element->uri,
+                    ]));
+
                 }
             }
         );
