@@ -4,12 +4,16 @@ namespace todaydesign\craftstaticdusk\jobs;
 
 use Craft;
 use craft\queue\BaseJob;
+use rias\scout\ScoutService;
+use rias\scout\engines\Engine;
+use rias\scout\Scout;
 
 class RefreshScoutIndexesJob extends BaseJob
 {
     public function execute($queue): void
     {
-        Craft::$app->get('scout')->indexAllElements();
+        $indexController = new \rias\scout\console\controllers\scout\IndexController('index', Scout::$plugin);
+        $indexController->actionRefresh();
         return;
     }
 
