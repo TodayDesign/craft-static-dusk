@@ -149,7 +149,15 @@ class GenerateController extends Controller
 
         curl_close($curl);
 
-        Craft::$app->getSession()->setNotice('Static build scheduled');
+        // Schedule the Scout refresh task
+        $delay = $launchTime/1000 - time(); // Calculate the delay in seconds
+        if ($delay > 0) {
+            Craft::$app->getQueue()->delay($delay)->push(new \todaydesign\craftstaticdusk\jobs\RefreshScoutIndexesJob());
+        } else {
+            Craft::$app->getQueue()->push(new \todaydesign\craftstaticdusk\jobs\RefreshScoutIndexesJob());
+        }
+
+        Craft::$app->getSession()->setNotice('Static build and Index Refresh scheduled');
     }
 
 
