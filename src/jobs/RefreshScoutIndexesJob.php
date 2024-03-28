@@ -12,6 +12,9 @@ class RefreshScoutIndexesJob extends BaseJob
 {
     public function execute($queue): void
     {
+        if (!defined('STDOUT')) {
+            define('STDOUT', fopen('php://stdout', 'w'));
+        }
         $indexController = new \rias\scout\console\controllers\scout\IndexController('index', Scout::$plugin);
         $indexController->actionRefresh();
         return;
