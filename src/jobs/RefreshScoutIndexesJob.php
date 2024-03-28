@@ -9,7 +9,7 @@ class RefreshScoutIndexesJob extends BaseJob
 {
     public function execute($queue): void
     {
-        Craft::$app->controller->runAction('scout/index/refresh');
+        Craft::$app->get('scout')->indexAllElements();
         return;
     }
 
