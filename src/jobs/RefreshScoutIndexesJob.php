@@ -9,7 +9,12 @@ class RefreshScoutIndexesJob extends BaseJob
 {
     public function execute($queue): void
     {
-        Craft::$app->runAction('scout/index/refresh');
+        \craft\helpers\App::runConsoleCommand('scout/index/refresh', []);
         return;
+    }
+
+    public function getDescription(): string
+    {
+        return 'Refresh Scout Indexes';
     }
 }
