@@ -16,6 +16,7 @@ use todaydesign\craftstaticdusk\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
+use craft\base\Model;
 use craft\services\Plugins;
 use craft\events\PluginEvent;
 use craft\web\UrlManager;
@@ -63,7 +64,7 @@ class CraftStaticDusk extends Plugin
      *
      * @var string
      */
-    public $schemaVersion = '1.0.1';
+    public string $schemaVersion = '1.2.0';
 
     // Public Methods
     // =========================================================================
@@ -174,7 +175,7 @@ class CraftStaticDusk extends Plugin
      *
      * @return \craft\base\Model|null
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?Model
     {
         return new Settings();
     }
@@ -194,4 +195,5 @@ class CraftStaticDusk extends Plugin
             ]
         );
     }
+
 }
