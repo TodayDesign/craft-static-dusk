@@ -49,7 +49,7 @@ class GenerateController extends Controller
      *
      * @return mixed
      */
-    public function actionBuild()
+    public function actionBuild(): mixed
     {
 
         $settings = CraftStaticDusk::$plugin->getSettings();
@@ -92,6 +92,8 @@ class GenerateController extends Controller
         curl_close($curl);
 
         Craft::$app->getSession()->setNotice('Static build initiated.');
+
+        return $this->asSuccess();
     }
 
     /**
@@ -100,7 +102,7 @@ class GenerateController extends Controller
      *
      * @return mixed
      */
-    public function actionSchedule()
+    public function actionSchedule(): mixed
     {
 
         $settings = CraftStaticDusk::$plugin->getSettings();
@@ -150,6 +152,8 @@ class GenerateController extends Controller
         curl_close($curl);
 
         Craft::$app->getSession()->setNotice('Static build scheduled');
+
+        return $this->asSuccess();
     }
 
 
@@ -159,7 +163,7 @@ class GenerateController extends Controller
      *
      * @return mixed
      */
-    public function actionDelete()
+    public function actionDelete(): mixed
     {
 
         $settings = CraftStaticDusk::$plugin->getSettings();
@@ -199,6 +203,8 @@ class GenerateController extends Controller
         curl_close($curl);
 
         Craft::$app->getSession()->setNotice('Static build removed');
+
+        return $this->asSuccess();
     }
 
 

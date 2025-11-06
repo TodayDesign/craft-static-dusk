@@ -39,13 +39,13 @@ class Settings extends Model
      *
      * @var string
      */
-    public $someAttribute = 'Some Default Setting';
-    public $webHookUrl = '';
-    public $webHookSecret = '';
-    public $webHookType = '';
-    public $gitRepo = '';
-    public $gitRef = '';
-    public $environmentName = '';
+    public string $someAttribute = 'Some Default Setting';
+    public string $webHookUrl = '';
+    public string $webHookSecret = '';
+    public string $webHookType = '';
+    public string $gitRepo = '';
+    public string $gitRef = '';
+    public string $environmentName = '';
 
 
     // Public Methods

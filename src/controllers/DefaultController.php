@@ -42,11 +42,11 @@ class DefaultController extends Controller
     // =========================================================================
 
     /**
-     * @var    bool|array Allows anonymous access to this controller's actions.
+     * @var    array|int|bool Allows anonymous access to this controller's actions.
      *         The actions must be in 'kebab-case'
      * @access protected
      */
-    protected $allowAnonymous = ['index', 'do-something'];
+    protected array|bool|int $allowAnonymous = ['index', 'do-something'];
 
     // Public Methods
     // =========================================================================
@@ -57,7 +57,7 @@ class DefaultController extends Controller
      *
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex(): mixed
     {
         $result = 'Welcome to the DefaultController actionIndex() method';
 
@@ -70,7 +70,7 @@ class DefaultController extends Controller
      *
      * @return mixed
      */
-    public function actionDoSomething()
+    public function actionDoSomething(): mixed
     {
         $result = 'Welcome to the DefaultController actionDoSomething() method';
 

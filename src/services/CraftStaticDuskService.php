@@ -43,7 +43,7 @@ class CraftStaticDuskService extends Component
      *
      * @return mixed
      */
-    public function exampleService()
+    public function exampleService(): mixed
     {
         $result = 'something';
         // Check our Plugin's settings for `someAttribute`
