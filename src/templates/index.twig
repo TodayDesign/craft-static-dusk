@@ -52,6 +52,7 @@
 {% set buildHistory = craft.craftStaticDusk.getBuildHistory(site.handle) %}
 
 {% set isMissingEnvVariables = craft.craftStaticDusk.isMissingEnvVariables() %}
+{% set isGhWebhook = craft.craftStaticDusk.isGhWebhook() %}
 
 {# Content that should appear in the page header #}
 {% set extraPageHeaderHtml %}
@@ -67,7 +68,7 @@
             <li><h2><span data-icon="alert" aria-label="Error"></span><strong>Warning:</strong> Missing environment variables</h2>
             </li>
             <li>
-                Make sure that the environment variables <strong>webHookSecret, webHookUrl, gitRepo, gitRef</strong> and <strong>environmentName</strong> are set in the project.yaml and are correctly set in the CI
+                Make sure that the environment variables {% if isGhWebhook %}<strong>webHookSecret, webHookUrl, gitRepo, gitRef</strong> and <strong>environmentName</strong>{% else %}<strong>webHookSecret</strong>, <strong>webHookUrl</strong> and <strong>environmentName</strong>{% endif %} are set in the project.yaml and are correctly set in the CI
             </li>
         </ul>
     {% endif %}
@@ -107,6 +108,7 @@
     <br>
     <br>
 
+    {% if isGhWebhook %}
     <h2>When do you want to launch the build?</h2>
     <div>
         <input
@@ -132,8 +134,9 @@
     </div>
 
     <br>
-
-
+    {% else %}
+    <br>
+    {% endif %}
 
     <form method="post" action="" class="launch_now">
         {{ csrfInput() }}
@@ -142,6 +145,7 @@
         <input type="submit" class="submit btn" value="Launch"/>
     </form>
 
+    {% if isGhWebhook %}
     <form method="post" action="" class="schedule" style="display: none">
         {{ csrfInput() }}
         {{ hiddenInput('siteHandle', site.handle) }}
@@ -215,10 +219,10 @@
     <p>Please refresh the page to update the list</p>
     <table id="types-craft-fields-Dropdown-options" class="editable fullwidth">
         <thead>
-            <tr>
-                <th scope="col" class="code singleline-cell textual">Status</th>
-                <th scope="col" class="code singleline-cell textual">Start time</th>
-            </tr>
+        <tr>
+            <th scope="col" class="code singleline-cell textual">Status</th>
+            <th scope="col" class="code singleline-cell textual">Start time</th>
+        </tr>
         </thead>
         <tbody>
 
@@ -245,6 +249,7 @@
         {% endfor %}
         </tbody>
     </table>
+    {% endif %}
 
 
 

@@ -17,44 +17,46 @@ class StaticBuildManager {
     {
         $settings = CraftStaticDusk::$plugin->getSettings();
 
-        $payload = [
-            'secret' => Craft::parseEnv($settings->webHookSecret),
-            'repo' => Craft::parseEnv($settings->gitRepo),
-            'ref' => Craft::parseEnv($settings->gitRef),
-            'envName' => Craft::parseEnv($settings->environmentName),
-            'site' => $site
-        ];
+        if (Craft::parseEnv($settings->webHookType) === 'GH') {
+            $payload = [
+                'secret' => Craft::parseEnv($settings->webHookSecret),
+                'repo' => Craft::parseEnv($settings->gitRepo),
+                'ref' => Craft::parseEnv($settings->gitRef),
+                'envName' => Craft::parseEnv($settings->environmentName),
+                'site' => $site
+            ];
 
-        $response = null;
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl) . '/scheduled',
+            $response = null;
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => Craft::parseEnv($settings->webHookUrl) . '/scheduled',
 //             CURLOPT_URL => "http://host.docker.internal:3000/static-build/scheduled",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_POSTFIELDS => json_encode((object)$payload),
-            CURLOPT_VERBOSE => TRUE,
-        ));
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CUSTOMREQUEST => "GET",
+                CURLOPT_POSTFIELDS => json_encode((object)$payload),
+                CURLOPT_VERBOSE => TRUE,
+            ));
 
-        $response = curl_exec($curl);
+            $response = curl_exec($curl);
 
-        if ($response === false) {
-            return [];
-        }
+            if ($response === false) {
+                return [];
+            }
 
-        $response = json_decode($response);
+            $response = json_decode($response);
 
-        curl_close($curl);
+            curl_close($curl);
 
-        if (property_exists($response, "responseObject")) {
+            if ($response !== null && property_exists($response, "responseObject")) {
 
-            // Convert unix milliseconds to seconds
-            $data = array_map(function ($build) {
-                $build->LaunchTime = $build->LaunchTime / 1000;
-                return $build;
-            }, $response->responseObject);
+                // Convert unix milliseconds to seconds
+                $data = array_map(function ($build) {
+                    $build->LaunchTime = $build->LaunchTime / 1000;
+                    return $build;
+                }, $response->responseObject);
 
-            return $response->responseObject;
+                return $response->responseObject;
+            }
         }
 
         return [];
@@ -69,38 +71,41 @@ class StaticBuildManager {
     public function getBuildHistory($site)
     {
         $settings = CraftStaticDusk::$plugin->getSettings();
-        $ref = str_replace("refs/heads/", "", Craft::parseEnv($settings->gitRef));
 
-        $payload = [
-            'secret' => Craft::parseEnv($settings->webHookSecret),
-            'repo' => Craft::parseEnv($settings->gitRepo),
-            'ref' => $ref,
-            'site' => $site
-        ];
+        if (Craft::parseEnv($settings->webHookType) === 'GH') {
+            $ref = str_replace("refs/heads/", "", Craft::parseEnv($settings->gitRef));
 
-        $response = null;
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => Craft::parseEnv($settings->webHookUrl) . '/history',
+            $payload = [
+                'secret' => Craft::parseEnv($settings->webHookSecret),
+                'repo' => Craft::parseEnv($settings->gitRepo),
+                'ref' => $ref,
+                'site' => $site
+            ];
+
+            $response = null;
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => Craft::parseEnv($settings->webHookUrl) . '/history',
 //             CURLOPT_URL => "http://host.docker.internal:3000/static-build/history",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_POSTFIELDS => json_encode((object)$payload),
-            CURLOPT_VERBOSE => TRUE,
-        ));
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CUSTOMREQUEST => "GET",
+                CURLOPT_POSTFIELDS => json_encode((object)$payload),
+                CURLOPT_VERBOSE => TRUE,
+            ));
 
-        $response = curl_exec($curl);
+            $response = curl_exec($curl);
 
-        if ($response === false) {
-            return [];
-        }
+            if ($response === false) {
+                return [];
+            }
 
-        $response = json_decode($response);
+            $response = json_decode($response);
 
-        curl_close($curl);
+            curl_close($curl);
 
-        if (property_exists($response, "responseObject")) {
-            return $response->responseObject;
+            if ($response !== null && property_exists($response, "responseObject")) {
+                return $response->responseObject;
+            }
         }
 
         return [];
